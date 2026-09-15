@@ -32,6 +32,10 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# Backend runtime
+backend_spring/token.txt
+backend_spring/uploads/
+
 # OS
 .DS_Store
 Thumbs.db
