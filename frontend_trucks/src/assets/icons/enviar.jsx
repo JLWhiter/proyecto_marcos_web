@@ -1,0 +1,9 @@
+
+function Enviar({ className = "", height = "10px", width = "12px", color = "#FFFFFF" }) {
+    return (
+    <svg className={className} width={width} height={height} viewBox="0 0 12 10" fill={color} xmlns="http://www.w3.org/2000/svg">
+        <path d="M0 9.33333V0L11.0833 4.66667L0 9.33333ZM1.16667 7.58333L8.07917 4.66667L1.16667 1.75V3.79167L4.66667 4.66667L1.16667 5.54167V7.58333ZM1.16667 7.58333V4.66667V1.75V3.79167V5.54167V7.58333Z" fill="currentColor"/>
+    </svg>
+    )
+}
+export default Enviar

@@ -1,0 +1,77 @@
+services:
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DB}
+    # NO exponer 3306 al host — solo accesible entre contenedores
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./bd_truck_automovite/bd_Trucks.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./bd_truck_automovite/00_inserts_completo.sql:/docker-entrypoint-initdb.d/02-seed.sql
+      - ./bd_truck_automovite/01_indices_vistas.sql:/docker-entrypoint-initdb.d/03-indices.sql
+      - ./bd_truck_automovite/02_procedimientos_almacenados.sql:/docker-entrypoint-initdb.d/04-sp.sql
+      - ./bd_truck_automovite/03_token_denylist.sql:/docker-entrypoint-initdb.d/05-denylist.sql
+      - ./bd_truck_automovite/04_alter_usuario_foto_privilegio.sql:/docker-entrypoint-initdb.d/06-foto-privilegio.sql
+      - ./bd_truck_automovite/05_crear_cliente_y_normalizar_venta.sql:/docker-entrypoint-initdb.d/07-cliente.sql
+      - ./bd_truck_automovite/06_agregar_cuotas_pagadas.sql:/docker-entrypoint-initdb.d/08-cuotas.sql
+      - ./bd_truck_automovite/10_configuracion_tasa.sql:/docker-entrypoint-initdb.d/09-configuracion.sql
+      - ./bd_truck_automovite/11_sesion_unica.sql:/docker-entrypoint-initdb.d/10-sesion-unica.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend_net
+
+  backend:
+    build: ./backend_sistema_inventario_trucks/Back-end
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SECRET_KEY: ${SECRET_KEY}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      JWT_EXPIRATION_HOURS: 8
+      MYSQL_HOST: db
+      MYSQL_PORT: 3306
+      MYSQL_USER: root
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DB: ${MYSQL_DB}
+      MYSQL_POOL_SIZE: 10
+      MYSQL_POOL_TIMEOUT: 10
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      GLOBAL_RATE_MAX: ${GLOBAL_RATE_MAX:-500}
+      GLOBAL_RATE_WINDOW: 60
+      LOGIN_MAX_ATTEMPTS: 5
+      LOGIN_RATE_WINDOW: 60
+      FLASK_ENV: production
+      DEBUG: "False"
+    # NO exponer 5000 al host — solo accesible via nginx en frontend
+    volumes:
+      - evidencias:/app/app/static/evidencias
+      - fotos:/app/app/static/fotos
+    networks:
+      - backend_net
+
+  frontend:
+    build: ./frontend_trucks
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+    networks:
+      - backend_net
+
+volumes:
+  mysql_data:
+  evidencias:
+  fotos:
+
+networks:
+  backend_net:
+    driver: bridge

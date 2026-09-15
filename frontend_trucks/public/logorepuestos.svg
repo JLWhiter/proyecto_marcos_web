@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120" width="400" height="120">
+  <defs>
+    <linearGradient id="gResp" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1a1f5c"/>
+      <stop offset="1" stop-color="#2435b8"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Rueda / tuerca automotriz -->
+  <g transform="translate(55,60)">
+    <circle cx="0" cy="0" r="40" fill="url(#gResp)"/>
+    <circle cx="0" cy="0" r="40" fill="none" stroke="#d9a520" stroke-width="5"/>
+    <circle cx="0" cy="0" r="16" fill="#ffffff" opacity="0.95"/>
+    <circle cx="0" cy="0" r="16" fill="none" stroke="#d9a520" stroke-width="4"/>
+    <circle cx="0" cy="0" r="6" fill="#d9a520"/>
+    <!-- rayos -->
+    <g stroke="#ffffff" stroke-width="5" stroke-linecap="round">
+      <line x1="0" y1="-38" x2="0" y2="-25"/>
+      <line x1="0" y1="25" x2="0" y2="38"/>
+      <line x1="-38" y1="0" x2="-25" y2="0"/>
+      <line x1="25" y1="0" x2="38" y2="0"/>
+      <line x1="-27" y1="-27" x2="-18" y2="-18"/>
+      <line x1="18" y1="18" x2="27" y2="27"/>
+      <line x1="27" y1="-27" x2="18" y2="-18"/>
+      <line x1="-18" y1="18" x2="-27" y2="27"/>
+    </g>
+  </g>
+
+  <!-- Texto -->
+  <text x="125" y="58" font-family="Arial, Helvetica, sans-serif" font-size="36" font-weight="800" fill="#1a1f5c" letter-spacing="1">Repuestos</text>
+  <text x="128" y="88" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="#d9a520" letter-spacing="4">SOLUTIONS</text>
+</svg>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Diagrama ER - bd_Trucks</title>
+<style>
+  body { margin: 0; padding: 20px; font-family: Arial, sans-serif; background: #1a1a2e; color: #eee; }
+  h1 { text-align: center; margin-bottom: 10px; }
+  .mermaid { background: #fff; border-radius: 8px; padding: 20px; }
+</style>
+</head>
+<body>
+<h1>Diagrama Entidad-Relacion: bd_Trucks</h1>
+<div class="mermaid">
+erDiagram
+    rol {
+        INT id PK
+        VARCHAR nombre
+    }
+    persona {
+        INT id PK
+        VARCHAR nombre
+        VARCHAR apellidos
+        CHAR dni UK
+        CHAR celular
+    }
+    usuario {
+        INT id PK
+        VARCHAR usuario UK
+        VARCHAR contrasena
+        INT id_persona FK
+        INT id_rol FK
+        TINYINT activo
+    }
+    auditoria {
+        INT id PK
+        VARCHAR tabla_afectada
+        ENUM accion
+        DATETIME fecha_hora
+        TEXT descripcion
+        INT id_registro
+        INT id_usuario FK
+    }
+    marca {
+        INT id PK
+        VARCHAR nombre
+    }
+    estado_producto {
+        INT id PK
+        VARCHAR nombre UK
+    }
+    ubicacion {
+        INT id PK
+        VARCHAR ubicacion
+        TEXT descripcion
+    }
+    proveedor {
+        INT id PK
+        VARCHAR nombre
+        CHAR ruc UK
+    }
+    categoria {
+        INT id PK
+        VARCHAR nombre UK
+    }
+    producto {
+        INT id PK
+        VARCHAR nombre
+        VARCHAR codigo UK
+        DECIMAL precio_compra
+        DECIMAL precio_venta
+        DECIMAL utilidad
+        INT id_marca FK
+        INT id_categoria FK
+    }
+    producto_proveedor {
+        INT id_producto FK
+        INT id_proveedor FK
+    }
+    producto_marca {
+        INT id_producto FK
+        INT id_marca FK
+    }
+    inventario {
+        INT id PK
+        INT stock_actual
+        INT stock_minimo
+        INT id_producto FK
+        INT id_estado_producto FK
+        INT id_ubicacion FK
+    }
+    movimiento_inventario {
+        INT id PK
+        ENUM tipo
+        INT cantidad
+        DATETIME fecha_hora
+        TEXT observacion
+        INT id_usuario FK
+        INT id_inventario FK
+    }
+    componente_producto {
+        INT id PK
+        INT cantidad
+        INT id_producto_padre FK
+        INT id_producto_hijo FK
+    }
+    tipo_documento {
+        INT id PK
+        VARCHAR nombre
+    }
+    venta {
+        INT id PK
+        VARCHAR nombre_cliente
+        VARCHAR ruc_dni
+        INT id_producto FK
+        INT cantidad
+        VARCHAR moneda
+        DECIMAL tasa_cambio
+        DECIMAL precio_unitario
+        DECIMAL precio_final
+        VARCHAR medio_pago
+        VARCHAR numero_documento
+        VARCHAR destino
+        VARCHAR agencia_devolucion
+        VARCHAR punto_recojo
+        VARCHAR adicionales
+        INT id_tipo_documento FK
+        TEXT observaciones
+        DECIMAL costo_envio
+        INT plazos
+        ENUM estado_pago
+        DATETIME fecha_hora
+        INT id_usuario FK
+    }
+    reporte_dano {
+        INT id PK
+        INT id_inventario FK
+        INT id_movimiento FK
+        INT cantidad
+        VARCHAR descripcion
+        VARCHAR evidencia_url
+        INT id_usuario FK
+        DATETIME fecha
+    }
+
+    rol ||--o{ usuario : "tiene"
+    persona ||--o{ usuario : "tiene"
+    usuario ||--o{ auditoria : "genera"
+    usuario ||--o{ movimiento_inventario : "registra"
+    usuario ||--o{ venta : "registra"
+    usuario ||--o{ reporte_dano : "reporta"
+    marca ||--o{ producto : "pertenece"
+    categoria ||--o{ producto : "clasifica"
+    producto ||--o{ producto_proveedor : ""
+    proveedor ||--o{ producto_proveedor : ""
+    producto ||--o{ producto_marca : ""
+    marca ||--o{ producto_marca : ""
+    producto ||--o{ inventario : "tiene"
+    estado_producto ||--o{ inventario : "clasifica"
+    ubicacion ||--o{ inventario : "ubica"
+    inventario ||--o{ movimiento_inventario : "afecta"
+    inventario ||--o{ reporte_dano : "reporta"
+    movimiento_inventario ||--o{ reporte_dano : "asocia"
+    producto ||--o{ venta : "se vende"
+    tipo_documento ||--o{ venta : "identifica"
+    producto ||--o{ componente_producto : "padre"
+    producto ||--o{ componente_producto : "hijo"
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'default',
+    er: {
+      layoutDirection: 'TB',
+      entityPadding: 15,
+      useMaxWidth: false
+    }
+  });
+</script>
+</body>
+</html>
