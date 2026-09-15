@@ -243,28 +243,13 @@ body {
   box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.06), 0 8px 30px rgba(7, 18, 66, 0.35);
 }
 .sidebar-hidden { transform: translateX(-100%); }
-@media (max-width: 767.98px) {
-  .sidebar { width: 0; padding: 0; }
-  .content-wrapper { margin-left: 0 !important; }
-}
 @media (min-width: 768px) {
-  .sidebar { width: 240px; }
-  /* For layouts with content wrapper having class "content-wrapper" or "flex-grow-1 min-w-0": */
-  .content-wrapper { margin-left: 240px !important; }
-}
-.sidebar-hidden { transform: translateX(-100%); }
-@media (max-width: 767.98px) {
-  .sidebar { width: 0; padding: 0; }
-  .content-wrapper { margin-left: 0 !important; }
-}
-@media (min-width: 768px) {
-  .sidebar { width: 240px; }
-  .content-wrapper { margin-left: 240px !important; }
-}
-.sidebar-hidden { transform: translateX(-100%); }
-@media (min-width: 768px) {
-  .sidebar { position: static; transform: none !important; }
+  .sidebar-hidden { transform: none !important; }
   .sidebar-w20 { width: 20%; }
+  .content-wrapper { margin-left: 240px !important; }
+}
+@media (max-width: 767.98px) {
+  .content-wrapper { margin-left: 0 !important; }
 }
 .sidebar .logo-zurb { width: 2.5rem; height: 2.5rem; }
 .nav-item-brand {

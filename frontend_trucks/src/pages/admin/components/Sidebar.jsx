@@ -26,7 +26,7 @@ function SideBar({ abierto = false, onCerrar = () => {}, currentPage }) {
                 <div className="d-flex flex-column text-start px-3 pt-4 pb-3">
                     <button onClick={onCerrar} className="d-md-none align-self-end bg-transparent border-0 text-white-50 fs-2 lh-1 fw-bold">&times;</button>
                     <h1 className="text-white fw-bolder fs-4 mb-0" style={{ letterSpacing: "-0.025em" }}>Repuestos Solutions</h1>
-                    <span className="text-brand-soft fw-semibold tracking-xs" style={{ fontSize: "0.6rem", color: "rgba(227,239,254,0.5) !important" }}>Gestión de Flotas</span>
+                    <span className="fw-semibold tracking-xs" style={{ fontSize: "0.6rem", color: "rgba(227,239,254,0.5)" }}>Gestión de Flotas</span>
                 </div>
 
                 <nav className="d-flex flex-column gap-1 mt-2">
