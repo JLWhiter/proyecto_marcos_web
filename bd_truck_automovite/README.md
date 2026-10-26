@@ -28,6 +28,18 @@ Los scripts son **idempotentes** (DROP IF EXISTS antes de cada CREATE).
 
 > `01_indices_vistas.sql` debe ejecutarse ANTES de `02_procedimientos_almacenados.sql` porque algunos SPs usan las vistas.
 
+## Acceso inicial
+
+El script `00_inserts_completo.sql` crea estas cuentas para probar el sistema:
+
+| Rol | Usuario | Contrasena |
+|-----|---------|------------|
+| Administrador | `admin` | `p123` |
+| Recepcion | `recepcion` | `p123` |
+| Almacenamiento | `almacen` | `p123` |
+
+Son credenciales de desarrollo local. Cambialas antes de exponer el sistema fuera de un entorno de pruebas.
+
 ---
 
 ## Tablas (18)
