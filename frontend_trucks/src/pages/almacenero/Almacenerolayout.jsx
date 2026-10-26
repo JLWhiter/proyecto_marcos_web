@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import TopBar from "./components/TopBar"
 import SideBar from './components/Sidebar';
+import InventarioFisico from '../../components/gestion/InventarioFisico';
 import Inventario from './Inventario';
 import ReporteDaño from './ReporteDaño';
 import Historial from './Historial';
@@ -12,6 +13,8 @@ function AlmaceneroLayout({ currentPage }) {
     switch (currentPage) {
       case "almacenero/reporte-daño":
         return <ReporteDaño />;
+      case "almacenero/inventario-fisico":
+        return <InventarioFisico />;
       case "almacenero/historial":
         return <Historial />;
       default:

@@ -5,13 +5,18 @@ import IconPagos from "../../../assets/icons/iconPagos.jsx";
 import InventarioAs from "../../../assets/icons/inventarioAs.jsx";
 import ReporteDano from "../../../assets/icons/reporteDano.jsx";
 import User from "../../../assets/icons/user.jsx";
+import StockT from "../../../assets/icons/stockT.jsx";
 import { useNavigation } from "../../../context/NavigationContext";
 
 const OPCIONES = [
     { page: "admin/dashboard", etiqueta: "Dashboard", Icono: User },
     { page: "admin/inventario", etiqueta: "Inventario", Icono: InventarioAs },
+    { page: "admin/inventario-fisico", etiqueta: "Inventario Físico", Icono: InventarioAs },
+    { page: "admin/ajustes", etiqueta: "Ajustes Inventario", Icono: IconPagos },
+    { page: "admin/alertas", etiqueta: "Alertas Reposición", Icono: StockT },
     { page: "admin/reporteventas", etiqueta: "Reporte Ventas", Icono: IconVenta },
     { page: "admin/pagos-pendientes", etiqueta: "Pagos Pendientes", Icono: IconPagos },
+    { page: "admin/danos", etiqueta: "Daños Pendientes", Icono: ReporteDano },
     { page: "admin/informe-danos", etiqueta: "Informe Daños", Icono: ReporteDano },
     { page: "admin/usuarios", etiqueta: "Gestión Usuarios", Icono: Enterdoor },
     { page: "admin/historial", etiqueta: "Historial", Icono: IconHistorial },

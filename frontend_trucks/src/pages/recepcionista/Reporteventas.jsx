@@ -24,7 +24,7 @@ const INPUT = "bg-transparent w-100 px-3 text-ink form-control-plaintext border-
 
 const ITEM_VACIO = {
     id_producto: null, codigo_producto: "", nombre_producto: "", proveedor: "", marca: "",
-    cantidad: 1, precio_unitario: 0,
+    cantidad: 1, precio_final: 0,
 };
 
 const FORM_BASE = {
@@ -124,7 +124,7 @@ function Reporteventas() {
             nombre_producto: p.nombre || "",
             marca: p.marca_nombre || "",
             proveedor: p.proveedor_nombre || "",
-            precio_unitario: p.precio_venta || it.precio_unitario,
+            precio_final: p.precio_venta || it.precio_final,
         } : it)));
         setSugerencias([]);
         setMostrarSugerencias(false);
@@ -134,7 +134,7 @@ function Reporteventas() {
     const tasaCambio = Number(form.tasa_cambio) || 1;
     const totalBruto = items.reduce((acc, it) => {
         const cant = Number(it.cantidad) || 0;
-        const prec = Number(it.precio_unitario) || 0;
+        const prec = Number(it.precio_final) || 0;
         return acc + cant * prec * tasaCambio;
     }, 0);
     const adelanto = form.para_taller ? 0 : Math.min(Number(form.adelanto) || 0, totalBruto);
@@ -159,7 +159,7 @@ function Reporteventas() {
         for (let i = 0; i < validos.length; i++) {
             const it = validos[i];
             if (Number(it.cantidad) < 1) { setModalAlert({ open: true, tipo: "error", titulo: "Validación", mensaje: `La cantidad del item ${i + 1} debe ser al menos 1` }); return; }
-            if (!form.para_taller && Number(it.precio_unitario) <= 0) { setModalAlert({ open: true, tipo: "error", titulo: "Validación", mensaje: `El precio del item ${i + 1} debe ser mayor a 0` }); return; }
+            if (!form.para_taller && Number(it.precio_final) <= 0) { setModalAlert({ open: true, tipo: "error", titulo: "Validación", mensaje: `El precio final del item ${i + 1} debe ser mayor a 0` }); return; }
         }
 
         const confirmar = window.confirm(`¿Estás seguro de registrar esta venta?\n\nProductos: ${validos.length}\nTotal: ${form.moneda}${totalVenta.toFixed(2)}${adelanto > 0 ? `\nAdelanto: ${form.moneda}${adelanto.toFixed(2)}` : ""}`);
@@ -169,7 +169,7 @@ function Reporteventas() {
         try {
             let registradas = 0;
             for (const it of validos) {
-                const precioBrutoItem = form.para_taller ? 0 : Number(it.cantidad) * Number(it.precio_unitario) * tasaCambio;
+                const precioBrutoItem = form.para_taller ? 0 : Number(it.cantidad) * Number(it.precio_final) * tasaCambio;
                 const precioFinalItem = form.para_taller ? 0 : precioBrutoItem - (registradas === 0 ? adelanto : 0);
                 await registrarVenta({
                     ...form,
@@ -179,7 +179,6 @@ function Reporteventas() {
                     marca: it.marca,
                     cantidad: Number(it.cantidad),
                     tasa_cambio: tasaCambio,
-                    precio_unitario: form.para_taller ? 0 : Number(it.precio_unitario),
                     precio_final: precioFinalItem,
                     plazos: esCredito ? numPlazos : 0,
                     fecha_pago: esCredito && form.fecha_pago ? form.fecha_pago : undefined,
@@ -343,13 +342,13 @@ function Reporteventas() {
                                             </CampoItem>
                                         </div>
                                         <div className="col-6 col-md-4 col-xl-2">
-                                            <CampoItem icono={IconEtiquetaprecio} etiqueta="Precio Unitario">
-                                                <input type="number" step="0.01" min="0" className={inputItem} value={it.precio_unitario} onChange={(e) => setItem(idx, "precio_unitario", e.target.value)} />
+                                            <CampoItem icono={IconEtiquetaprecio} etiqueta="Precio final sugerido">
+                                                <input type="number" step="0.01" min="0" className={inputItem} value={it.precio_final} onChange={(e) => setItem(idx, "precio_final", e.target.value)} title="Editable si hay negociación con el cliente" />
                                             </CampoItem>
                                         </div>
                                         <div className="col-12 col-md-4 col-xl-2 d-flex flex-column justify-content-end">
                                             <div className="bg-accent-soft rounded-2 border border-accent-soft text-center small fw-bold text-accent-deep d-flex align-items-center justify-content-center" style={{ height: "2.25rem", borderColor: "rgba(230,126,34,.3)" }}>
-                                                Subtotal: {form.moneda}{((Number(it.cantidad) || 0) * (Number(it.precio_unitario) || 0) * tasaCambio).toFixed(2)}
+                                                Subtotal: {form.moneda}{((Number(it.cantidad) || 0) * (Number(it.precio_final) || 0) * tasaCambio).toFixed(2)}
                                             </div>
                                         </div>
                                     </div>

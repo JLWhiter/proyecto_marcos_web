@@ -5,6 +5,7 @@ import { useNavigation } from "../../../context/NavigationContext";
 
 const OPCIONES = [
     { page: "almacenero/inventario", etiqueta: "Inventario", Icono: InventarioAs },
+    { page: "almacenero/inventario-fisico", etiqueta: "Inventario Físico", Icono: InventarioAs },
     { page: "almacenero/reporte-daño", etiqueta: "Reporte de Daño", Icono: ReporteDano },
     { page: "almacenero/historial", etiqueta: "Historial", Icono: IconHistorial },
 ];
@@ -13,7 +14,7 @@ function SideBar({ abierto = false, onCerrar = () => {}, currentPage }) {
     const { navigate } = useNavigation();
 
     return (
-        <div className={`sidebar sidebar-w20 bg-brand ${abierto ? "" : "sidebar-hidden"}`}>
+        <div className={`sidebar bg-brand ${abierto ? "" : "sidebar-hidden"}`}>
             <div className="d-flex flex-column">
                 <div className="d-flex flex-column text-start px-3 pt-4 pb-3">
                     <button onClick={onCerrar} className="d-md-none align-self-end bg-transparent border-0 text-white-50 fs-2 lh-1 fw-bold">&times;</button>

@@ -1,4 +1,4 @@
-import logoTrucks from "../assets/logos/logorepuestos.svg";
+import logoRepuestos from "../assets/logos/logorepuestos.svg";
 import Contraseña from "../assets/icons/contraseña.jsx";
 import Correo from "../assets/icons/correo.jsx";
 import Auth from "../assets/icons/authicon.jsx";
@@ -47,47 +47,51 @@ function Login() {
 
 
     return (
-        <section className="bg-white h-100 px-4 d-flex justify-content-center align-items-center" style={{ paddingTop: 75, paddingBottom: 75 }}>
-            <div className="d-flex flex-column gap-4 h-100 w-100 max-w-md">
-                <div className="w-100 d-flex justify-content-center">
-                    <img src={logoTrucks} alt="Logo Repuestos Solutions" style={{ width: 193 }} />
-                </div>
-                <div className="bg-white p-4 rounded-1 w-100 h-100 d-flex flex-column gap-4 shadow-lg border border-line">
-                    <div className="text-center">
-                        <h1 className="text-ink fs-5 fw-semibold">Acceso de inventario</h1>
-                        <p className="text-slate fw-light mb-0">Inicio de sesión seguro para el personal de flota registrado</p>
-                    </div>
-                    <div className="d-flex flex-column gap-4">
-                        <h2 className="text-muted fw-bold fs-6">SELECCIONAR ROL DE ACCESO</h2>
-                        <form onSubmit={handleSubmit} className="w-100 d-flex flex-column gap-2">
-                            <div className="w-100 d-flex flex-column gap-2">
-                                <div className="d-flex flex-column gap-2">
-                                    <label htmlFor="email" className="text-slate fw-bold">USUARIO</label>
-                                    <div className="position-relative">
-                                        <Correo className="pos-abs-center-left" />
-                                        <input className="form-control field w-100" type="text" name="email" id="email" required placeholder="admin" value={email} onChange={(e) => setEmail(e.target.value)} />
+        <section className="min-vh-100 bg-white d-flex align-items-center py-5 px-3">
+            <div className="container">
+                <div className="row justify-content-center">
+                    <div className="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5 col-xxl-4">
+                        <div className="d-flex flex-column gap-4">
+                            <div className="d-flex justify-content-center">
+                                <img src={logoRepuestos} alt="Logo Repuestos Solutions" className="img-fluid" style={{ width: 193 }} />
+                            </div>
+                            <div className="card border-line rounded-1 shadow-lg">
+                                <div className="card-body p-4 d-flex flex-column gap-4">
+                                    <div className="text-center">
+                                        <h1 className="text-ink fs-5 fw-semibold">Acceso de inventario</h1>
+                                        <p className="text-slate fw-light mb-0">Inicio de sesión seguro para el personal de flota registrado</p>
                                     </div>
-                                </div>
-                                <div className="d-flex flex-column gap-2">
-                                    <label htmlFor="contraseña" className="text-slate fw-bold">CONTRASEÑA</label>
-                                    <div className="position-relative">
-                                        <Contraseña className="pos-abs-center-left" />
-                                        <input className="form-control field w-100" type="password" name="contraseña" id="contraseña" placeholder="••••••••" required value={password} onChange={(e) => setPassword(e.target.value)} />
+                                    <div>
+                                        <h2 className="text-muted fw-bold fs-6 mb-3">INGRESA TUS CREDENCIALES</h2>
+                                        <form onSubmit={handleSubmit} className="d-flex flex-column gap-3" aria-busy={cargando}>
+                                            <div>
+                                                <label htmlFor="email" className="form-label fw-semibold text-slate mb-1">USUARIO</label>
+                                                <div className="input-group">
+                                                    <span className="input-group-text bg-surface border-line"><Correo className="icon-sm text-muted" /></span>
+                                                    <input className="form-control" type="text" name="email" id="email" required placeholder="admin" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} />
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label htmlFor="contraseña" className="form-label fw-semibold text-slate mb-1">CONTRASEÑA</label>
+                                                <div className="input-group">
+                                                    <span className="input-group-text bg-surface border-line"><Contraseña className="icon-sm text-muted" /></span>
+                                                    <input className="form-control" type="password" name="contraseña" id="contraseña" placeholder="••••••••" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+                                                </div>
+                                            </div>
+
+                                            <button type="submit" disabled={cargando} className="btn btn-brand w-100 py-3 d-flex justify-content-center align-items-center gap-2">
+                                                {cargando ? "VERIFICANDO..." : "AUTENTICAR"} <Auth className="icon-sm" />
+                                            </button>
+
+                                            {error && <p className="alert alert-danger py-2 mb-0 small" role="alert">{error}</p>}
+                                            {success && <p className="alert alert-success py-2 mb-0 small" role="status">{success}</p>}
+                                        </form>
                                     </div>
                                 </div>
                             </div>
-
-                            <div className="w-100">
-                                <button disabled={cargando} className="btn btn-auth text-white w-100 h-100 d-flex justify-content-center align-items-center gap-1">{cargando ? "VERIFICANDO..." : "AUTENTICAR"} <Auth /></button>
-                            </div>
-
-                            {error && <p className="small text-danger mb-0">{error}</p>}
-                            {success && <p className="small text-success mb-0">{success}</p>}
-                        </form>
+                            <p className="text-center text-muted mb-0">© 2026 Repuestos Solutions</p>
+                        </div>
                     </div>
-                </div>
-                <div className="text-center text-muted">
-                    <p className="mb-0">© 2026 Repuestos Solutions</p>
                 </div>
             </div>
         </section>

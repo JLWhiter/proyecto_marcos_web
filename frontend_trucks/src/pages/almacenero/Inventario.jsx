@@ -139,11 +139,9 @@ function Inventario() {
                         </div>
                         <div className="d-flex flex-column">
                             <span className="small fw-bold text-ink">Alerta de Stock Bajo</span>
-                            {bajoStock.length > 0 && (
-                                <span className="badge-soft bg-danger-subtle text-danger border border-danger mt-1 w-fit">
-                                    {bajoStock.filter(p => p.stock_actual < 2).length}
-                                </span>
-                            )}
+                            <span className={`badge mt-1 w-fit ${bajoStock.length > 0 ? "text-bg-danger" : "text-bg-success"}`} aria-live="polite">
+                                {bajoStock.length > 0 ? `${bajoStock.length} para reponer` : "Sin alertas"}
+                            </span>
                         </div>
                     </div>
                 </div>

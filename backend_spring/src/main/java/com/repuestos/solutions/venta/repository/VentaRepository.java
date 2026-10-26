@@ -4,6 +4,7 @@ import com.repuestos.solutions.common.BusinessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -72,6 +73,30 @@ public class VentaRepository {
                 "VALUES ('movimiento_inventario', 'insert', ?, ?, ?, NOW())", userId, idMovimiento,
                 "Venta: salida qty=" + cantidad + " inv=" + idInventario);
 
+        // El stock puede quedar en el mínimo (o por debajo) sin bloquear la venta.
+        // En ese momento se dispara la alerta de reposición para el administrador.
+        Map<String, Object> invActual = jdbc.queryForMap(
+                "SELECT stock_actual, stock_minimo FROM inventario WHERE id = ?", idInventario);
+        int stockNuevo = ((Number) invActual.get("stock_actual")).intValue();
+        int stockMinimo = ((Number) invActual.get("stock_minimo")).intValue();
+        if (stockNuevo <= stockMinimo) {
+            crearAlertaReposicion(idProducto, stockNuevo, stockMinimo);
+        }
+
+        // El precio interno del producto no se recibe desde el frontend: se
+        // obtiene aquí y queda como referencia. El vendedor solo envía el
+        // precio final sugerido/negociado.
+        BigDecimal precioUnitario = jdbc.queryForObject(
+                "SELECT COALESCE(precio_venta, 0) FROM producto WHERE id = ?",
+                BigDecimal.class, idProducto);
+        if (precioUnitario == null) {
+            precioUnitario = BigDecimal.ZERO;
+        }
+        BigDecimal precioFinal = bigDecimal(d.get("precio_final"));
+        if (precioFinal == null) {
+            precioFinal = precioUnitario;
+        }
+
         Integer idCliente = resolverCliente(d);
 
         String nombreCliente = str(d.get("nombre_cliente"));
@@ -95,8 +120,8 @@ public class VentaRepository {
                 """,
                 idCliente, nombreCliente, rucDni, idProducto, cantidad, moneda,
                 dec(d.get("tasa_cambio"), 1),
-                dec(d.get("precio_unitario"), 0),
-                dec(d.get("precio_final"), 0),
+                precioUnitario,
+                precioFinal,
                 str(d.get("medio_pago")),
                 str(d.get("numero_documento")),
                 str(d.get("destino")),
@@ -269,6 +294,32 @@ public class VentaRepository {
             return n.doubleValue();
         }
         return def;
+    }
+
+    private BigDecimal bigDecimal(Object v) {
+        if (v instanceof Number n) {
+            return BigDecimal.valueOf(n.doubleValue());
+        }
+        if (v instanceof String s && !s.isBlank()) {
+            try {
+                return new BigDecimal(s.trim());
+            } catch (NumberFormatException ignored) {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    /** Crea una alerta de reposición solo si no hay otra pendiente para el producto. */
+    private void crearAlertaReposicion(int idProducto, int stockMomento, int stockMinimo) {
+        jdbc.update("""
+                INSERT INTO alerta_reposicion (id_producto, stock_momento, stock_minimo, estado, fecha)
+                SELECT ?, ?, ?, 'PENDIENTE', NOW() FROM DUAL
+                 WHERE NOT EXISTS (
+                     SELECT 1 FROM alerta_reposicion
+                      WHERE id_producto = ? AND estado = 'PENDIENTE'
+                 )
+                """, idProducto, stockMomento, stockMinimo, idProducto);
     }
 
     private String str(Object v) {

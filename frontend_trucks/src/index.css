@@ -142,40 +142,6 @@ body {
   transform: translateY(-50%);
 }
 
-/* Campo de entrada con borde de marca y espacio para icono */
-.field {
-  border: 2px solid var(--line) !important;
-  border-radius: 0.55rem !important;
-  background-color: var(--surface) !important;
-  height: 38px;
-  padding-left: 2.5rem;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-.field:focus {
-  border-color: var(--accent) !important;
-  box-shadow: 0 0 0 0.25rem var(--accent-soft) !important;
-}
-
-/* Botón de autenticación con degradado */
-.btn-auth {
-  background: var(--brand-gradient);
-  border-radius: 0.6rem;
-  height: 52px;
-  border: none;
-  color: #fff;
-  box-shadow: var(--shadow-md);
-  letter-spacing: 0.08em;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
-}
-.btn-auth:hover, .btn-auth:active, .btn-auth:focus {
-  background: var(--brand-gradient);
-  color: #fff;
-}
-.btn-auth:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-lg);
-}
-
 /* ---------- Formularios ---------- */
 .form-input {
   border: 1px solid var(--line);
@@ -245,7 +211,6 @@ body {
 .sidebar-hidden { transform: translateX(-100%); }
 @media (min-width: 768px) {
   .sidebar-hidden { transform: none !important; }
-  .sidebar-w20 { width: 20%; }
   .content-wrapper { margin-left: 240px !important; }
 }
 @media (max-width: 767.98px) {

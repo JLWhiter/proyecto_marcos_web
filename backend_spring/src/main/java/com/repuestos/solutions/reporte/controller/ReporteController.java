@@ -124,8 +124,8 @@ public class ReporteController {
 
     @PostMapping("/dano")
     public ResponseEntity<?> reportarDano(@RequestBody Map<String, Object> body) {
-        if (!SecurityUtil.hasAnyRole(1, 3)) {
-            return ApiResponse.error("Acceso denegado.", HttpStatus.FORBIDDEN);
+        if (!SecurityUtil.hasAnyRole(3)) {
+            return ApiResponse.error("Solo el almacenero puede registrar reportes de daño.", HttpStatus.FORBIDDEN);
         }
         Integer idInventario = body.get("id_inventario") instanceof Number n ? n.intValue() : null;
         Integer cantidad = body.get("cantidad") instanceof Number n ? n.intValue() : null;
@@ -141,7 +141,7 @@ public class ReporteController {
 
     @PostMapping("/evidencia")
     public ResponseEntity<?> subirEvidencia(@RequestParam("file") MultipartFile file) {
-        if (!SecurityUtil.hasAnyRole(1, 3)) {
+        if (!SecurityUtil.hasAnyRole(3)) {
             return ApiResponse.error("Acceso denegado.", HttpStatus.FORBIDDEN);
         }
         if (file == null || file.isEmpty()) {

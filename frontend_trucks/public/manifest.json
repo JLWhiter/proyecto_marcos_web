@@ -1,7 +1,7 @@
 {
-  "name": "TRUCKS Solutions",
-  "short_name": "TRUCKS Solutions",
-  "description": "Sistema de inventario - TRUCKS Solutions",
+  "name": "Repuestos Solutions",
+  "short_name": "Repuestos Solutions",
+  "description": "Sistema de inventario - Repuestos Solutions",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#1a2332",
@@ -9,7 +9,7 @@
   "orientation": "any",
   "icons": [
     {
-      "src": "/logotrucks.svg",
+      "src": "/logorepuestos.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"

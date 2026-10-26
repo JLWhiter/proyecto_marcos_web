@@ -28,6 +28,17 @@ public class GlobalExceptionHandler {
         return err(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ResponseEntity<Map<String, Object>> accessDenied(
+            org.springframework.security.access.AccessDeniedException ex) {
+        return err(ex.getMessage() == null ? "Acceso denegado" : ex.getMessage(), HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String, Object>> illegalArgument(IllegalArgumentException ex) {
+        return err(ex.getMessage() == null ? "Solicitud incorrecta" : ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> validation(MethodArgumentNotValidException ex) {
         FieldError fe = ex.getBindingResult().getFieldError();

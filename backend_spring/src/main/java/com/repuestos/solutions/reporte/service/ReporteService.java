@@ -1,6 +1,8 @@
 package com.repuestos.solutions.reporte.service;
 
 import com.repuestos.solutions.common.BusinessException;
+import com.repuestos.solutions.gestion.dto.DanoDto;
+import com.repuestos.solutions.gestion.service.GestionInventarioService;
 import com.repuestos.solutions.reporte.repository.ReporteRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,9 +18,11 @@ import java.util.Map;
 public class ReporteService {
 
     private final ReporteRepository repo;
+    private final GestionInventarioService gestion;
 
-    public ReporteService(ReporteRepository repo) {
+    public ReporteService(ReporteRepository repo, GestionInventarioService gestion) {
         this.repo = repo;
+        this.gestion = gestion;
     }
 
     public Map<String, Object> valorInventario() {
@@ -60,15 +64,11 @@ public class ReporteService {
     }
 
     @Transactional
-    public Map<String, Object> reportarDano(Integer idInventario, Integer cantidad, String descripcion,
-                                            String evidenciaUrl, int userId) {
-        if (idInventario == null || idInventario <= 0) {
-            throw new BusinessException("El producto es obligatorio");
-        }
-        if (cantidad == null || cantidad <= 0) {
-            throw new BusinessException("La cantidad debe ser un entero mayor a 0");
-        }
-        return repo.reportarDano(idInventario, cantidad, descripcion, evidenciaUrl, userId);
+    public DanoDto reportarDano(Integer idInventario, Integer cantidad, String descripcion,
+                                String evidenciaUrl, int userId) {
+        // El flujo real (stock, estado PENDIENTE y rol de almacenero) vive en
+        // GestionInventarioService. El userId se toma del JWT, no del body.
+        return gestion.reportarDano(idInventario, cantidad, descripcion, evidenciaUrl);
     }
 
     public Map<String, Object> listarDanos(String fechaDesde, String fechaHasta, int page, int perPage) {

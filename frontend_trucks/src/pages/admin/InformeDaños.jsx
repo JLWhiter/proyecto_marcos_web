@@ -1,6 +1,20 @@
 import { useEffect, useState } from "react";
 import { reportesDano } from "../../api/reportes";
 
+function EstadoDano({ estado, fecha }) {
+    const valor = (estado || "PENDIENTE").toUpperCase();
+    const clases = {
+        PENDIENTE: "text-bg-warning",
+        CONFIRMADO: "text-bg-success",
+        RECHAZADO: "text-bg-secondary",
+    };
+    return (
+        <span className={`badge ${clases[valor] || "text-bg-light"}`} title={fecha ? `Confirmado: ${fecha}` : undefined}>
+            {valor}
+        </span>
+    );
+}
+
 function InformeDaños() {
     const [reportes, setReportes] = useState([]);
     const [cargando, setCargando] = useState(true);
@@ -72,13 +86,14 @@ function InformeDaños() {
                                     <th className="px-3 py-3">Cantidad</th>
                                     <th className="px-3 py-3">Descripción</th>
                                     <th className="px-3 py-3">Registrado por</th>
+                                    <th className="px-3 py-3">Estado</th>
                                     <th className="px-3 py-3">Evidencia</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {cargando && (<tr><td colSpan="7" className="px-3 py-5 text-center small text-muted">Cargando informes...</td></tr>)}
-                                {!cargando && error && (<tr><td colSpan="7" className="px-3 py-5 text-center small text-danger">{error}</td></tr>)}
-                                {!cargando && !error && reportes.length === 0 && (<tr><td colSpan="7" className="px-3 py-5 text-center small text-muted">No hay reportes de daño.</td></tr>)}
+                                {cargando && (<tr><td colSpan="8" className="px-3 py-5 text-center small text-muted">Cargando informes...</td></tr>)}
+                                {!cargando && error && (<tr><td colSpan="8" className="px-3 py-5 text-center small text-danger">{error}</td></tr>)}
+                                {!cargando && !error && reportes.length === 0 && (<tr><td colSpan="8" className="px-3 py-5 text-center small text-muted">No hay reportes de daño.</td></tr>)}
                                 {reportes.map((r) => (
                                     <tr key={r.id} className="small text-ink align-top">
                                         <td className="px-3 py-3 text-nowrap">{formatearFecha(r.fecha)}</td>
@@ -87,6 +102,9 @@ function InformeDaños() {
                                         <td className="px-3 py-3 fw-bold text-danger">{r.cantidad ?? "—"}</td>
                                         <td className="px-3 py-3" style={{ maxWidth: "17rem" }}>{r.descripcion || "—"}</td>
                                         <td className="px-3 py-3">{r.usuario_nombre || "—"}</td>
+                                        <td className="px-3 py-3">
+                                            <EstadoDano estado={r.estado} fecha={r.fecha_confirmacion} />
+                                        </td>
                                         <td className="px-3 py-3">
                                             {r.evidencia_url
                                                 ? <button onClick={() => setImagen(r.evidencia_url)} className="btn btn-outline-secondary btn-sm rounded-2 fw-bold">Ver</button>

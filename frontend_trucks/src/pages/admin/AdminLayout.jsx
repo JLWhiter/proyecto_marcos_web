@@ -1,7 +1,11 @@
 import { useState } from 'react';
 import TopBar from "./components/TopBar"
 import SideBar from './components/Sidebar';
-import Dashboard from './Dashboard';
+import Dashboard from '../../components/gestion/Dashboard';
+import InventarioFisico from '../../components/gestion/InventarioFisico';
+import DanosPendientes from '../../components/gestion/DanosPendientes';
+import AjustesInventario from '../../components/gestion/AjustesInventario';
+import AlertasReposicion from '../../components/gestion/AlertasReposicion';
 import Inventario from './Inventario';
 import Reporteventas from './Reporteventas';
 import PagosPendientes from './PagosPendientes';
@@ -19,6 +23,14 @@ function AdminLayout({ currentPage }) {
     switch (currentPage) {
       case "admin/inventario":
         return <Inventario />;
+      case "admin/inventario-fisico":
+        return <InventarioFisico />;
+      case "admin/danos":
+        return <DanosPendientes />;
+      case "admin/ajustes":
+        return <AjustesInventario />;
+      case "admin/alertas":
+        return <AlertasReposicion />;
       case "admin/reporteventas":
         return <Reporteventas />;
       case "admin/pagos-pendientes":

@@ -75,7 +75,7 @@ function ReporteDaño() {
                 id_inventario: seleccionado.id, cantidad: qty, descripcion,
                 evidencia_url: evidenciaUrl || undefined,
             });
-            setModalAlert({ open: true, tipo: "exito", titulo: "Reporte enviado", mensaje: `Producto: ${r.data?.producto_codigo || seleccionado.producto_codigo} · ${qty} unidad(es).` });
+            setModalAlert({ open: true, tipo: "exito", titulo: "Reporte enviado", mensaje: `Producto: ${r.data?.productoCodigo || seleccionado.producto_codigo} · ${qty} unidad(es). Queda pendiente de confirmación del administrador.` });
             limpiar();
         } catch (e) {
             setModalAlert({ open: true, tipo: "error", titulo: "Error", mensaje: e.message });
@@ -159,7 +159,7 @@ function ReporteDaño() {
 
             {modalAlert.open && <ModalAlert tipo={modalAlert.tipo} titulo={modalAlert.titulo} mensaje={modalAlert.mensaje} onClose={() => setModalAlert({ ...modalAlert, open: false })} />}
             {pendienteConfirmar && (
-                <ModalAlert tipo="confirmar" titulo="¿Enviar reporte?" mensaje={`Producto: ${seleccionado?.producto_codigo} · Cantidad: ${cantidad} · Stock restante: ${(seleccionado?.stock_actual || 0) - Number(cantidad)}`}
+                <ModalAlert tipo="confirmar" titulo="¿Enviar reporte?" mensaje={`Producto: ${seleccionado?.producto_codigo} · Cantidad: ${cantidad} · El stock se descontará recién cuando el administrador confirme la baja.`}
                     onConfirm={enviarReporte} onClose={() => setPendienteConfirmar(false)} textoConfirmar="Enviar" />
             )}
         </section>

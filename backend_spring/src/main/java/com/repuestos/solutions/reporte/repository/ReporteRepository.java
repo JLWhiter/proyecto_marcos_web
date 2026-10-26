@@ -1,6 +1,5 @@
 package com.repuestos.solutions.reporte.repository;
 
-import com.repuestos.solutions.common.BusinessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -187,47 +186,6 @@ public class ReporteRepository {
         return jdbc.queryForList(sql, params.toArray());
     }
 
-    /** Registra la baja por daño (movimiento salida + reporte_dano) dentro de la transacción del servicio. */
-    public Map<String, Object> reportarDano(int idInventario, int cantidad, String descripcion,
-                                            String evidenciaUrl, int userId) {
-        List<Map<String, Object>> inv = jdbc.queryForList(
-                "SELECT stock_actual FROM inventario WHERE id = ? FOR UPDATE", idInventario);
-        if (inv.isEmpty()) {
-            throw new BusinessException("El registro de inventario no existe");
-        }
-        int stock = ((Number) inv.get(0).get("stock_actual")).intValue();
-        if (stock < cantidad) {
-            throw new BusinessException("Stock insuficiente. Disponible: " + stock);
-        }
-        jdbc.update("UPDATE inventario SET stock_actual = stock_actual - ? WHERE id = ?", cantidad, idInventario);
-        String obs = "Daño de " + cantidad + " unidades";
-        if (descripcion != null && !descripcion.isBlank()) {
-            obs += " - " + descripcion;
-        }
-        jdbc.update("INSERT INTO movimiento_inventario (tipo, cantidad, observacion, id_usuario, id_inventario) " +
-                        "VALUES ('salida', ?, ?, ?, ?)",
-                cantidad, obs, userId, idInventario);
-        int idMovimiento = jdbc.queryForObject("SELECT LAST_INSERT_ID()", Integer.class);
-        jdbc.update("INSERT INTO reporte_dano (id_inventario, id_movimiento, cantidad, descripcion, evidencia_url, id_usuario) " +
-                        "VALUES (?, ?, ?, ?, ?, ?)",
-                idInventario, idMovimiento, cantidad, descripcion, evidenciaUrl, userId);
-        int idReporte = jdbc.queryForObject("SELECT LAST_INSERT_ID()", Integer.class);
-
-        List<Map<String, Object>> prod = jdbc.queryForList(
-                "SELECT p.codigo AS producto_codigo, p.nombre AS producto_nombre " +
-                        "FROM inventario i JOIN producto p ON p.id = i.id_producto WHERE i.id = ?", idInventario);
-        String codigo = prod.isEmpty() ? null : str(prod.get(0).get("producto_codigo"));
-        String nombre = prod.isEmpty() ? null : str(prod.get(0).get("producto_nombre"));
-
-        Map<String, Object> result = new LinkedHashMap<>();
-        result.put("id", idReporte);
-        result.put("id_movimiento", idMovimiento);
-        result.put("producto_codigo", codigo);
-        result.put("producto_nombre", nombre);
-        result.put("cantidad", cantidad);
-        return result;
-    }
-
     public List<Map<String, Object>> listarDanos(String fechaDesde, String fechaHasta, int page, int perPage) {
         List<Object> params = new ArrayList<>();
         StringBuilder where = new StringBuilder(" WHERE 1=1 ");
@@ -244,6 +202,7 @@ public class ReporteRepository {
         params.add(offset);
         String sql = """
                 SELECT r.id, r.fecha, r.cantidad, r.descripcion, r.evidencia_url,
+                       r.estado, r.fecha_confirmacion,
                        p.codigo AS producto_codigo, p.nombre AS producto_nombre,
                        CONCAT(pe.nombre, ' ', pe.apellidos) AS usuario_nombre
                   FROM reporte_dano r
@@ -268,9 +227,5 @@ public class ReporteRepository {
         }
         Long c = jdbc.queryForObject("SELECT COUNT(*) FROM reporte_dano r " + where, Long.class, params.toArray());
         return c == null ? 0 : c;
-    }
-
-    private String str(Object v) {
-        return v == null ? null : String.valueOf(v);
     }
 }
