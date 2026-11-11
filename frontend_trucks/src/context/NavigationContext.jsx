@@ -4,7 +4,6 @@ const NavigationContext = createContext();
 
 export function NavigationProvider({ children }) {
   const [currentPage, setCurrentPage] = useState(() => {
-    if (!localStorage.getItem("trucks_token")) return "login";
     return sessionStorage.getItem("trucks_page") || "login";
   });
 

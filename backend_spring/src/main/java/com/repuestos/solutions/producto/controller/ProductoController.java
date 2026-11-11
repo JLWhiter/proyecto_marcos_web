@@ -58,7 +58,7 @@ public class ProductoController {
 
     @PostMapping
     public ResponseEntity<?> crear(@RequestBody Map<String, Object> body) {
-        ResponseEntity<?> forbidden = requireSupervisorOrAdmin();
+        ResponseEntity<?> forbidden = requireAuthenticated();
         if (forbidden != null) {
             return forbidden;
         }
@@ -81,7 +81,7 @@ public class ProductoController {
 
     @PostMapping("/registrar")
     public ResponseEntity<?> registrar(@RequestBody Map<String, Object> body) {
-        ResponseEntity<?> forbidden = requireSupervisorOrAdmin();
+        ResponseEntity<?> forbidden = requireAuthenticated();
         if (forbidden != null) {
             return forbidden;
         }
@@ -178,7 +178,7 @@ public class ProductoController {
 
     @PostMapping("/{id}/imagen")
     public ResponseEntity<?> subirImagen(@PathVariable int id, @RequestParam("file") MultipartFile file) {
-        ResponseEntity<?> forbidden = requireSupervisorOrAdmin();
+        ResponseEntity<?> forbidden = requireAuthenticated();
         if (forbidden != null) {
             return forbidden;
         }
@@ -273,22 +273,22 @@ public class ProductoController {
         return Math.min(value, 100);
     }
 
-    private ResponseEntity<?> requireSupervisorOrAdmin() {
-        if (!SecurityUtil.hasAnyRole(1, 2, 3)) {
+    private ResponseEntity<?> requireAuthenticated() {
+        if (!SecurityUtil.hasAnyRole(SecurityUtil.ROLE_ADMIN, SecurityUtil.ROLE_RECEPCION, SecurityUtil.ROLE_ALMACENAMIENTO)) {
             return ApiResponse.error("Acceso denegado.", HttpStatus.FORBIDDEN);
         }
         return null;
     }
 
     private ResponseEntity<?> requireCanDelete() {
-        if (!SecurityUtil.hasAnyRole(1, 2)) {
+        if (!SecurityUtil.hasAnyRole(SecurityUtil.ROLE_ADMIN, SecurityUtil.ROLE_RECEPCION)) {
             return ApiResponse.error("Acceso denegado.", HttpStatus.FORBIDDEN);
         }
         return null;
     }
 
     private ResponseEntity<?> requireAdminOrPriceEditor() {
-        if (SecurityUtil.hasAnyRole(1)) {
+        if (SecurityUtil.hasAnyRole(SecurityUtil.ROLE_ADMIN)) {
             return null;
         }
         List<String> rows = jdbc.queryForList(

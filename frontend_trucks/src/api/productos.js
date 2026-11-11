@@ -30,10 +30,9 @@ export function eliminarProducto(id) {
 export function subirImagenProducto(id, file) {
   const formData = new FormData();
   formData.append('file', file);
-  const token = localStorage.getItem('trucks_token');
   return fetch(`/api/v1/productos/${id}/imagen`, {
     method: 'POST',
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    credentials: 'same-origin',
     body: formData,
   }).then(r => r.json());
 }

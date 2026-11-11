@@ -1,15 +1,5 @@
 package com.repuestos.solutions.gestion.service;
 
-import com.repuestos.solutions.common.BusinessException;
-import com.repuestos.solutions.gestion.dto.*;
-import com.repuestos.solutions.gestion.model.*;
-import com.repuestos.solutions.gestion.repository.*;
-import com.repuestos.solutions.security.SecurityUtil;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -17,6 +7,34 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.repuestos.solutions.common.BusinessException;
+import com.repuestos.solutions.gestion.dto.AjusteDto;
+import com.repuestos.solutions.gestion.dto.AlertaDto;
+import com.repuestos.solutions.gestion.dto.DanoDto;
+import com.repuestos.solutions.gestion.dto.InventarioUbicacionDto;
+import com.repuestos.solutions.gestion.dto.OrdenCompraDto;
+import com.repuestos.solutions.gestion.dto.ProductoInventarioDto;
+import com.repuestos.solutions.gestion.model.AjusteInventario;
+import com.repuestos.solutions.gestion.model.AlertaReposicion;
+import com.repuestos.solutions.gestion.model.Inventario;
+import com.repuestos.solutions.gestion.model.OrdenCompra;
+import com.repuestos.solutions.gestion.model.Producto;
+import com.repuestos.solutions.gestion.model.ReporteDano;
+import com.repuestos.solutions.gestion.model.Usuario;
+import com.repuestos.solutions.gestion.repository.GestionAjusteInventarioRepository;
+import com.repuestos.solutions.gestion.repository.GestionAlertaReposicionRepository;
+import com.repuestos.solutions.gestion.repository.GestionInventarioRepository;
+import com.repuestos.solutions.gestion.repository.GestionOrdenCompraRepository;
+import com.repuestos.solutions.gestion.repository.GestionProductoRepository;
+import com.repuestos.solutions.gestion.repository.GestionReporteDanoRepository;
+import com.repuestos.solutions.gestion.repository.GestionUsuarioRepository;
+import com.repuestos.solutions.security.SecurityUtil;
 
 @Service
 public class GestionInventarioService {
@@ -68,7 +86,7 @@ public class GestionInventarioService {
 
     @Transactional
     public DanoDto reportarDano(Integer idInventario, Integer cantidad, String motivo, String evidenciaUrl) {
-        requireRole(3);
+        requireRole(SecurityUtil.ROLE_ALMACENAMIENTO);
         if (idInventario == null || cantidad == null || cantidad <= 0) {
             throw new BusinessException("La cantidad debe ser un entero mayor a 0");
         }
@@ -95,7 +113,7 @@ public class GestionInventarioService {
 
     @Transactional(readOnly = true)
     public List<DanoDto> listarDanos(String estado) {
-        requireRole(1);
+        requireRole(SecurityUtil.ROLE_ADMIN);
         List<ReporteDano> reportes;
         if (estado == null || estado.isBlank()) {
             reportes = reporteRepo.findAllByOrderByFechaDesc();
@@ -113,7 +131,7 @@ public class GestionInventarioService {
 
     @Transactional
     public DanoDto confirmarBaja(Integer reporteId) {
-        requireRole(1);
+        requireRole(SecurityUtil.ROLE_ADMIN);
         ReporteDano r = reporteRepo.findById(reporteId)
                 .orElseThrow(() -> new BusinessException("El reporte de daño no existe"));
         if (r.getEstado() != ReporteDano.Estado.PENDIENTE) {
@@ -151,7 +169,7 @@ public class GestionInventarioService {
 
     @Transactional
     public DanoDto rechazarBaja(Integer reporteId) {
-        requireRole(1);
+        requireRole(SecurityUtil.ROLE_ADMIN);
         ReporteDano r = reporteRepo.findById(reporteId)
                 .orElseThrow(() -> new BusinessException("El reporte de daño no existe"));
         if (r.getEstado() != ReporteDano.Estado.PENDIENTE) {
@@ -169,7 +187,7 @@ public class GestionInventarioService {
 
     @Transactional
     public AjusteDto ajustarInventario(Integer productoId, Integer nuevoStock, String motivo) {
-        requireRole(1);
+        requireRole(SecurityUtil.ROLE_ADMIN);
         if (productoId == null) {
             throw new BusinessException("El producto es obligatorio");
         }
@@ -216,13 +234,13 @@ public class GestionInventarioService {
 
     @Transactional(readOnly = true)
     public List<AjusteDto> listarAjustes() {
-        requireRole(1);
+        requireRole(SecurityUtil.ROLE_ADMIN);
         return ajusteRepo.findAllByOrderByFechaDesc().stream().map(this::toAjusteDto).toList();
     }
 
     @Transactional(readOnly = true)
     public List<ProductoInventarioDto> buscarProductosInventario(String q) {
-        requireRole(1);
+        requireRole(SecurityUtil.ROLE_ADMIN);
         String filtro = q == null ? "" : q.trim();
         String like = "%" + filtro + "%";
         String sql = """
@@ -279,14 +297,14 @@ public class GestionInventarioService {
 
     @Transactional(readOnly = true)
     public List<AlertaDto> alertasPendientes() {
-        requireRole(1);
+        requireRole(SecurityUtil.ROLE_ADMIN);
         return alertaRepo.findByEstadoOrderByFechaDesc(AlertaReposicion.Estado.PENDIENTE)
                 .stream().map(this::toAlertaDto).toList();
     }
 
     @Transactional
     public OrdenCompraDto emitirOrdenCompra(Integer alertaId, Integer proveedorId, Integer cantidad) {
-        requireRole(1);
+        requireRole(SecurityUtil.ROLE_ADMIN);
         AlertaReposicion alerta = alertaRepo.findById(alertaId)
                 .orElseThrow(() -> new BusinessException("La alerta no existe"));
         if (alerta.getEstado() != AlertaReposicion.Estado.PENDIENTE) {
@@ -316,7 +334,7 @@ public class GestionInventarioService {
 
     @Transactional(readOnly = true)
     public List<OrdenCompraDto> listarOrdenesCompra() {
-        requireRole(1);
+        requireRole(SecurityUtil.ROLE_ADMIN);
         return ordenRepo.findAllByOrderByFechaDesc().stream().map(this::toOrdenDto).toList();
     }
 
@@ -326,7 +344,7 @@ public class GestionInventarioService {
 
     @Transactional(readOnly = true)
     public List<InventarioUbicacionDto> inventarioPorUbicacion(String codigo) {
-        requireRole(1, 2, 3);
+        requireRole(SecurityUtil.ROLE_ADMIN, SecurityUtil.ROLE_RECEPCION, SecurityUtil.ROLE_ALMACENAMIENTO);
         if (codigo == null || codigo.isBlank()) {
             throw new BusinessException("La ubicación es obligatoria");
         }
@@ -342,7 +360,7 @@ public class GestionInventarioService {
 
     @Transactional(readOnly = true)
     public List<Map<String, Object>> listarUbicaciones() {
-        requireRole(1, 2, 3);
+        requireRole(SecurityUtil.ROLE_ADMIN, SecurityUtil.ROLE_RECEPCION, SecurityUtil.ROLE_ALMACENAMIENTO);
         return jdbc.queryForList("SELECT id, ubicacion AS codigo, descripcion FROM ubicacion ORDER BY ubicacion");
     }
 
@@ -352,10 +370,13 @@ public class GestionInventarioService {
 
     @Transactional(readOnly = true)
     public Map<String, Object> dashboard(String periodo) {
-        requireRole(1);
+        requireRole(SecurityUtil.ROLE_ADMIN);
         int dias = "semana".equalsIgnoreCase(periodo) ? 7 : 30;
         LocalDateTime desde = LocalDateTime.now().minusDays(dias);
         Timestamp ts = Timestamp.valueOf(desde);
+        Integer ventasPeriodo = jdbc.queryForObject(
+            "SELECT COUNT(*) FROM venta WHERE fecha_hora >= ?", Integer.class, ts);
+        boolean hayVentasPeriodo = ventasPeriodo != null && ventasPeriodo > 0;
 
         BigDecimal valorTotal = jdbc.queryForObject("""
                 SELECT COALESCE(SUM(i.stock_actual * COALESCE(p.precio_compra, 0)), 0)
@@ -374,7 +395,7 @@ public class GestionInventarioService {
                  LIMIT 5
                 """);
 
-        List<Map<String, Object>> menorRotacion = jdbc.queryForList("""
+        List<Map<String, Object>> menorRotacion = hayVentasPeriodo ? jdbc.queryForList("""
                 SELECT p.codigo, p.nombre, MAX(i.stock_actual) AS stock,
                        COALESCE(SUM(v.cantidad), 0) AS ventas
                   FROM producto p
@@ -384,23 +405,26 @@ public class GestionInventarioService {
                  GROUP BY p.id, p.codigo, p.nombre
                  ORDER BY ventas ASC, stock DESC
                  LIMIT 5
-                """, ts);
+                """, ts) : List.of();
 
-        List<Map<String, Object>> obsoletos = new ArrayList<>(jdbc.queryForList("""
-                SELECT p.codigo, p.nombre, MAX(i.stock_actual) AS stock,
+            List<Map<String, Object>> obsoletos = new ArrayList<>();
+            if (hayVentasPeriodo) {
+                obsoletos.addAll(jdbc.queryForList("""
+                    SELECT p.codigo, p.nombre, MAX(i.stock_actual) AS stock,
                        'Sin ventas en el periodo' AS motivo
-                  FROM producto p
-                  JOIN inventario i ON i.id_producto = p.id
-                 WHERE (p.activo = 1 OR p.activo IS NULL)
-                   AND i.stock_actual > 0
-                   AND NOT EXISTS (
+                      FROM producto p
+                      JOIN inventario i ON i.id_producto = p.id
+                     WHERE (p.activo = 1 OR p.activo IS NULL)
+                       AND i.stock_actual > 0
+                       AND NOT EXISTS (
                        SELECT 1 FROM venta v
                         WHERE v.id_producto = p.id AND v.fecha_hora >= ?
-                   )
-                 GROUP BY p.id, p.codigo, p.nombre
-                 ORDER BY stock DESC
-                 LIMIT 5
-                """, ts));
+                       )
+                     GROUP BY p.id, p.codigo, p.nombre
+                     ORDER BY stock DESC
+                     LIMIT 5
+                    """, ts));
+            }
         obsoletos.addAll(jdbc.queryForList("""
                 SELECT p.codigo, p.nombre, MAX(i.stock_actual) AS stock,
                        'Dañado confirmado' AS motivo
@@ -417,6 +441,7 @@ public class GestionInventarioService {
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("periodo", dias == 7 ? "semana" : "mes");
         result.put("dias", dias);
+        result.put("hayVentasPeriodo", hayVentasPeriodo);
         result.put("valorTotal", valorTotal == null ? BigDecimal.ZERO : valorTotal);
         result.put("mayorValor", mayorValor);
         result.put("menorRotacion", menorRotacion);

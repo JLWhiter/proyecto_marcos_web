@@ -8,6 +8,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
  */
 public final class SecurityUtil {
 
+    public static final int ROLE_ADMIN = 1;
+    public static final int ROLE_RECEPCION = 2;
+    public static final int ROLE_ALMACENAMIENTO = 3;
+
     private SecurityUtil() {
     }
 

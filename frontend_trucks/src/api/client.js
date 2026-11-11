@@ -1,17 +1,19 @@
 const API_BASE = '/api/v1';
 const TOKEN_KEY = 'trucks_token';
 const USER_KEY = 'trucks_user';
+let currentUser = null;
 
 export async function api(path, { method = 'GET', body, ...rest } = {}) {
-  const headers = { 'Content-Type': 'application/json' };
-  const token = localStorage.getItem(TOKEN_KEY);
-  if (token) headers.Authorization = `Bearer ${token}`;
+  const isFormData = body instanceof FormData;
+  const headers = { ...rest.headers };
+  if (!isFormData) headers['Content-Type'] = 'application/json';
 
   const res = await fetch(`${API_BASE}${path}`, {
     method,
     headers,
-    body: body ? JSON.stringify(body) : undefined,
     ...rest,
+    credentials: 'same-origin',
+    body: body === undefined ? undefined : isFormData ? body : JSON.stringify(body),
   });
 
   let data = null;
@@ -35,23 +37,15 @@ export async function api(path, { method = 'GET', body, ...rest } = {}) {
 }
 
 export function setSession(data) {
-  localStorage.setItem(TOKEN_KEY, data.token);
-  localStorage.setItem(USER_KEY, JSON.stringify(data.usuario));
+  currentUser = data?.usuario || null;
 }
 
 export function clearSession() {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
+  currentUser = null;
 }
 
 export function getUser() {
-  try {
-    return JSON.parse(localStorage.getItem(USER_KEY) || 'null');
-  } catch {
-    return null;
-  }
-}
-
-export function isAuthenticated() {
-  return !!localStorage.getItem(TOKEN_KEY);
+  return currentUser;
 }

@@ -2,13 +2,12 @@ import { useState, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigation } from "../context/NavigationContext";
 import { actualizarPerfil, subirFotoPerfil } from "../api/auth";
-import { setSession } from "../api/client";
 
 const INPUT = "form-input";
 const LABEL = "form-label-sm";
 
 function EditarPerfil() {
-    const { user } = useAuth();
+    const { user, updateUser } = useAuth();
     const { navigate } = useNavigation();
     const fileInputRef = useRef(null);
 
@@ -52,9 +51,7 @@ function EditarPerfil() {
             if (nuevaFoto) {
                 setFotoPreview(nuevaFoto);
                 const updatedUser = { ...user, foto: nuevaFoto };
-                const token = localStorage.getItem("trucks_token");
-                setSession({ token, usuario: updatedUser });
-                window.location.reload();
+                updateUser(updatedUser);
             }
             setFotoFile(null);
             setMensaje("Foto actualizada correctamente");
@@ -77,8 +74,7 @@ function EditarPerfil() {
         try {
             await actualizarPerfil(form);
             const updatedUser = { ...user, ...form };
-            const token = localStorage.getItem("trucks_token");
-            setSession({ token, usuario: updatedUser });
+            updateUser(updatedUser);
             setMensaje("Perfil actualizado correctamente");
             if (fotoFile) await subirFoto();
         } catch (err) {
@@ -90,14 +86,14 @@ function EditarPerfil() {
 
     const getRol = () => {
         if (user?.rol_nombre === "Administrador") return "admin";
-        if (user?.rol_nombre === "Recepcionista" || user?.rol_nombre === "Recepción") return "recepcionista";
-        if (user?.rol_nombre === "Almacenista" || user?.rol_nombre === "Almacenero") return "almacenero";
+        if (user?.rol_nombre === "Almacenamiento") return "almacenero";
         return "recepcionista";
     };
 
     const volver = () => {
         const rol = getRol();
         if (rol === "admin") navigate("admin/dashboard");
+        else if (rol === "almacenero") navigate("almacenero/inventario");
         else navigate("recepcionista/recepcion");
     };
 

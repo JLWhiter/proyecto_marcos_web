@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { dashboard as apiDashboard } from '../../api/gestion';
+import { useNavigation } from '../../context/NavigationContext';
 
 const money = (v) => {
   const n = Number(v);
@@ -15,7 +16,7 @@ function KpiCard({ titulo, valor, detalle, color, icono }) {
       <div className="card-body">
         <div className="d-flex justify-content-between align-items-start">
           <p className="text-muted text-uppercase fw-bold small mb-1">{titulo}</p>
-          <span className="fs-4">{icono}</span>
+          {icono && <span className="fs-4">{icono}</span>}
         </div>
         <p className="fs-3 fw-bolder text-dark mb-0">{valor}</p>
         <p className="small text-muted mb-0">{detalle}</p>
@@ -24,11 +25,12 @@ function KpiCard({ titulo, valor, detalle, color, icono }) {
   );
 }
 
-function Tabla({ titulo, head, children, vacio }) {
+function Tabla({ titulo, head, children, vacio, onVer }) {
   return (
     <div className="card border-0 shadow-sm h-100">
-      <div className="card-header bg-white border-0 pt-3">
+      <div className="card-header bg-white border-0 pt-3 d-flex justify-content-between align-items-center gap-2">
         <h3 className="h6 fw-bold text-uppercase text-secondary mb-0">{titulo}</h3>
+        {onVer && <button type="button" className="btn btn-sm btn-outline-primary text-nowrap" onClick={onVer}>Ver lista</button>}
       </div>
       <div className="table-responsive">
         <table className="table table-sm table-hover align-middle mb-0">
@@ -48,43 +50,40 @@ function Tabla({ titulo, head, children, vacio }) {
 }
 
 export default function Dashboard() {
-  const [periodo, setPeriodo] = useState('mes');
+  const { navigate } = useNavigation();
   const [data, setData] = useState(null);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
+  const [refreshTick, setRefreshTick] = useState(0);
 
-  const cargar = useCallback(() => {
+  useEffect(() => {
+    let activo = true;
+    apiDashboard()
+      .then((res) => { if (activo) setData(res.data || null); })
+      .catch((err) => { if (activo) setError(err.message); })
+      .finally(() => { if (activo) setCargando(false); });
+    return () => { activo = false; };
+  }, [refreshTick]);
+
+  const cargar = () => {
     setCargando(true);
     setError('');
-    apiDashboard(periodo)
-      .then((res) => setData(res.data || null))
-      .catch((err) => setError(err.message))
-      .finally(() => setCargando(false));
-  }, [periodo]);
-
-  useEffect(() => { cargar(); }, [cargar]);
+    setRefreshTick((tick) => tick + 1);
+  };
 
   const mayorValor = data?.mayorValor || [];
   const menorRotacion = data?.menorRotacion || [];
   const obsoletos = data?.obsoletos || [];
-  const etiquetaPeriodo = periodo === 'semana' ? 'últimos 7 días' : 'últimos 30 días';
-
   return (
     <div className="container-fluid py-4 px-4 bg-light min-vh-100">
       <div className="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <div>
           <h2 className="fw-bolder mb-1">Dashboard</h2>
-          <p className="text-muted mb-0 small">Indicadores de inventario y rotación · {etiquetaPeriodo}</p>
+          <p className="text-muted mb-0 small">Indicadores de inventario y rotación</p>
         </div>
-        <div className="d-flex gap-2">
-          <select className="form-select" value={periodo} onChange={(e) => setPeriodo(e.target.value)}>
-            <option value="mes">Mensual (30 días)</option>
-            <option value="semana">Semanal (7 días)</option>
-          </select>
-          <button className="btn btn-outline-secondary" onClick={cargar} disabled={cargando}>
-            Actualizar
-          </button>
-        </div>
+        <button className="btn btn-outline-secondary" onClick={cargar} disabled={cargando}>
+          Actualizar
+        </button>
       </div>
 
       {error && <div className="alert alert-danger">{error}</div>}
@@ -101,7 +100,7 @@ export default function Dashboard() {
                 titulo="Valor total del inventario"
                 valor={money(data.valorTotal)}
                 detalle="Stock actual × costo de compra"
-                color="border-primary" icono="💰"
+                color="border-primary"
               />
             </div>
             <div className="col-12 col-md-6 col-xl-3">
@@ -116,7 +115,9 @@ export default function Dashboard() {
               <KpiCard
                 titulo="Artículos con menor rotación"
                 valor={num(menorRotacion.length)}
-                detalle={menorRotacion[0] ? `Menos vendido: ${menorRotacion[0].codigo} (${num(menorRotacion[0].ventas)} u.)` : 'Sin datos'}
+                detalle={data.hayVentasPeriodo
+                  ? (menorRotacion[0] ? `Menos vendido: ${menorRotacion[0].codigo} (${num(menorRotacion[0].ventas)} u.)` : 'Sin datos')
+                  : 'Sin ventas registradas en el periodo'}
                 color="border-warning" icono="🐢"
               />
             </div>
@@ -124,7 +125,9 @@ export default function Dashboard() {
               <KpiCard
                 titulo="Obsoletos o dañados"
                 valor={num(obsoletos.length)}
-                detalle="Sin ventas en el periodo o daño confirmado"
+                detalle={data.hayVentasPeriodo
+                  ? 'Sin ventas durante el periodo o daño confirmado'
+                  : (obsoletos.length ? 'Incluye daños confirmados' : 'Sin ventas ni daños confirmados')}
                 color="border-danger" icono="⚠️"
               />
             </div>
@@ -136,6 +139,7 @@ export default function Dashboard() {
                 titulo="Mayor valor en inventario"
                 head={['Código', 'Producto', 'Stock', 'Valor']}
                 vacio="Sin productos"
+                onVer={() => navigate('admin/inventario')}
               >
                 {mayorValor.map((p) => (
                   <tr key={`mv-${p.codigo}`}>
@@ -149,9 +153,10 @@ export default function Dashboard() {
             </div>
             <div className="col-12 col-xl-4">
               <Tabla
-                titulo={`Menor rotación (${etiquetaPeriodo})`}
+                titulo="Menor rotación"
                 head={['Código', 'Producto', 'Ventas', 'Stock']}
-                vacio="Sin productos"
+                vacio={data.hayVentasPeriodo ? 'Sin productos' : 'Aún no hay ventas registradas en el periodo'}
+                onVer={() => navigate('admin/reporteventas')}
               >
                 {menorRotacion.map((p) => (
                   <tr key={`mr-${p.codigo}`}>
@@ -167,7 +172,8 @@ export default function Dashboard() {
               <Tabla
                 titulo="Obsoletos o dañados"
                 head={['Código', 'Producto', 'Stock', 'Motivo']}
-                vacio="Sin productos"
+                vacio={data.hayVentasPeriodo ? 'Sin productos' : 'Sin ventas ni daños confirmados'}
+                onVer={() => navigate('admin/danos')}
               >
                 {obsoletos.map((p, i) => (
                   <tr key={`ob-${p.codigo}-${i}`}>

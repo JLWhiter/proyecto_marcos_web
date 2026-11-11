@@ -34,7 +34,7 @@ public class InventarioController {
                                     @RequestParam(defaultValue = "100") int per_page,
                                     @RequestParam(required = false) String q,
                                     @RequestParam(required = false) Integer stock) {
-        if (!SecurityUtil.hasAnyRole(1)) {
+        if (!SecurityUtil.hasAnyRole(SecurityUtil.ROLE_ADMIN)) {
             return ApiResponse.error("Acceso denegado.", HttpStatus.FORBIDDEN);
         }
         return ApiResponse.success(service.listar(q, stock, page, per_page), "Inventario obtenido");
@@ -42,7 +42,7 @@ public class InventarioController {
 
     @GetMapping("/bajo-stock")
     public ResponseEntity<?> bajoStock() {
-        if (!SecurityUtil.hasAnyRole(1, 2, 3)) {
+        if (!SecurityUtil.hasAnyRole(SecurityUtil.ROLE_ADMIN, SecurityUtil.ROLE_RECEPCION, SecurityUtil.ROLE_ALMACENAMIENTO)) {
             return ApiResponse.error("Acceso denegado.", HttpStatus.FORBIDDEN);
         }
         return ApiResponse.success(service.bajoStock(), "Productos bajo stock");
@@ -50,7 +50,7 @@ public class InventarioController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> obtener(@PathVariable int id) {
-        if (!SecurityUtil.hasAnyRole(1)) {
+        if (!SecurityUtil.hasAnyRole(SecurityUtil.ROLE_ADMIN)) {
             return ApiResponse.error("Acceso denegado.", HttpStatus.FORBIDDEN);
         }
         try {
@@ -62,7 +62,7 @@ public class InventarioController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> actualizar(@PathVariable int id, @RequestBody Map<String, Object> body) {
-        if (!SecurityUtil.hasAnyRole(1)) {
+        if (!SecurityUtil.hasAnyRole(SecurityUtil.ROLE_ADMIN)) {
             return ApiResponse.error("Acceso denegado.", HttpStatus.FORBIDDEN);
         }
         try {

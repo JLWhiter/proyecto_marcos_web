@@ -36,7 +36,7 @@ public class UsuarioController {
                                     @RequestParam(required = false) String solo_activos,
                                     @RequestParam(required = false) Integer id_rol,
                                     @RequestParam(defaultValue = "1") int page) {
-        if (!SecurityUtil.hasAnyRole(1)) {
+        if (!SecurityUtil.hasAnyRole(SecurityUtil.ROLE_ADMIN)) {
             return ApiResponse.error("Acceso denegado.", HttpStatus.FORBIDDEN);
         }
         int safePerPage = per_page > 0 ? per_page : 100;
@@ -45,7 +45,7 @@ public class UsuarioController {
 
     @GetMapping("/roles")
     public ResponseEntity<?> roles() {
-        if (!SecurityUtil.hasAnyRole(1)) {
+        if (!SecurityUtil.hasAnyRole(SecurityUtil.ROLE_ADMIN)) {
             return ApiResponse.error("Acceso denegado.", HttpStatus.FORBIDDEN);
         }
         return ApiResponse.success(service.roles(), "Roles obtenidos");
@@ -53,7 +53,7 @@ public class UsuarioController {
 
     @PostMapping
     public ResponseEntity<?> crear(@RequestBody Map<String, Object> body) {
-        if (!SecurityUtil.hasAnyRole(1)) {
+        if (!SecurityUtil.hasAnyRole(SecurityUtil.ROLE_ADMIN)) {
             return ApiResponse.error("Acceso denegado.", HttpStatus.FORBIDDEN);
         }
         try {
@@ -67,7 +67,7 @@ public class UsuarioController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> actualizar(@PathVariable int id, @RequestBody Map<String, Object> body) {
-        if (!SecurityUtil.hasAnyRole(1)) {
+        if (!SecurityUtil.hasAnyRole(SecurityUtil.ROLE_ADMIN)) {
             return ApiResponse.error("Acceso denegado.", HttpStatus.FORBIDDEN);
         }
         try {
@@ -80,7 +80,7 @@ public class UsuarioController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminar(@PathVariable int id) {
-        if (!SecurityUtil.hasAnyRole(1)) {
+        if (!SecurityUtil.hasAnyRole(SecurityUtil.ROLE_ADMIN)) {
             return ApiResponse.error("Acceso denegado.", HttpStatus.FORBIDDEN);
         }
         service.desactivar(id, SecurityUtil.currentUserId());
@@ -89,7 +89,7 @@ public class UsuarioController {
 
     @PutMapping("/{id}/activar")
     public ResponseEntity<?> activar(@PathVariable int id) {
-        if (!SecurityUtil.hasAnyRole(1)) {
+        if (!SecurityUtil.hasAnyRole(SecurityUtil.ROLE_ADMIN)) {
             return ApiResponse.error("Acceso denegado.", HttpStatus.FORBIDDEN);
         }
         service.activar(id, SecurityUtil.currentUserId());

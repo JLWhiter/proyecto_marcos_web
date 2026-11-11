@@ -1,14 +1,19 @@
 package com.repuestos.solutions.auth.controller;
 
-import com.repuestos.solutions.auth.dto.LoginRequest;
-import com.repuestos.solutions.auth.service.AuthService;
-import com.repuestos.solutions.common.ApiResponse;
-import com.repuestos.solutions.common.BusinessException;
-import com.repuestos.solutions.security.AppUser;
-import com.repuestos.solutions.security.SecurityUtil;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.Duration;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,14 +24,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.UUID;
+import com.repuestos.solutions.auth.dto.LoginRequest;
+import com.repuestos.solutions.auth.service.AuthService;
+import com.repuestos.solutions.common.ApiResponse;
+import com.repuestos.solutions.common.BusinessException;
+import com.repuestos.solutions.security.AppUser;
+import com.repuestos.solutions.security.SecurityUtil;
+
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 
 /**
  * Réplica de routes/auth.py + AuthController (Flask): /api/v1/auth.
@@ -36,8 +43,15 @@ import java.util.UUID;
 public class AuthController {
 
     private static final String UPLOAD_DIR = "./uploads/fotos";
+    private static final String AUTH_COOKIE = "trucks_token";
 
     private final AuthService authService;
+
+    @Value("${app.jwt.expiration-hours}")
+    private long expirationHours;
+
+    @Value("${app.auth.cookie-secure:false}")
+    private boolean secureCookie;
 
     public AuthController(AuthService authService) {
         this.authService = authService;
@@ -47,16 +61,45 @@ public class AuthController {
     public ResponseEntity<Map<String, Object>> login(@Valid @RequestBody LoginRequest body) {
         body.setUsuario(body.getUsuario() == null ? "" : body.getUsuario().trim());
         Map<String, Object> result = authService.login(body.getUsuario(), body.getContrasena());
-        return ApiResponse.success(result, "Inicio de sesión exitoso");
+        String token = (String) result.remove("token");
+        ResponseCookie cookie = ResponseCookie.from(AUTH_COOKIE, token)
+                .httpOnly(true)
+                .secure(secureCookie)
+                .sameSite("Lax")
+                .path("/")
+                .maxAge(Duration.ofHours(expirationHours))
+                .build();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(ApiResponse.success(result, "Inicio de sesión exitoso").getBody());
     }
 
     @PostMapping("/logout")
     public ResponseEntity<Map<String, Object>> logout(HttpServletRequest request) {
-        String header = request.getHeader("Authorization");
-        String token = header != null && header.startsWith("Bearer ")
-                ? header.substring(7).trim() : "";
+        String token = tokenFrom(request);
         authService.logout(token, SecurityUtil.current().id());
-        return ApiResponse.success("Sesión cerrada");
+        ResponseCookie cookie = ResponseCookie.from(AUTH_COOKIE, "")
+                .httpOnly(true)
+                .secure(secureCookie)
+                .sameSite("Lax")
+                .path("/")
+                .maxAge(Duration.ZERO)
+                .build();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(ApiResponse.success("Sesión cerrada").getBody());
+    }
+
+    private String tokenFrom(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (AUTH_COOKIE.equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return "";
     }
 
     @GetMapping("/me")
