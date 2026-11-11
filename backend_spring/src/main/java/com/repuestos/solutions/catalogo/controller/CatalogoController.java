@@ -1,9 +1,7 @@
 package com.repuestos.solutions.catalogo.controller;
 
-import com.repuestos.solutions.catalogo.service.CatalogoService;
-import com.repuestos.solutions.common.ApiResponse;
-import com.repuestos.solutions.common.BusinessException;
-import com.repuestos.solutions.security.SecurityUtil;
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,8 +10,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-import java.util.Map;
+import com.repuestos.solutions.catalogo.service.CatalogoService;
+import com.repuestos.solutions.common.ApiResponse;
+import com.repuestos.solutions.common.BusinessException;
+import com.repuestos.solutions.security.SecurityUtil;
 
 /**
  * Catálogos: marcas, categorías, estados de producto y tipos de documento.
@@ -88,7 +88,7 @@ public class CatalogoController {
     }
 
     private ResponseEntity<?> requireSupervisorOrAdmin() {
-        if (!SecurityUtil.hasAnyRole(1, 2, 3)) {
+        if (!SecurityUtil.hasAnyRole(SecurityUtil.ROLE_ADMIN, SecurityUtil.ROLE_RECEPCION, SecurityUtil.ROLE_ALMACENAMIENTO)) {
             return ApiResponse.error("Acceso denegado.", HttpStatus.FORBIDDEN);
         }
         return null;

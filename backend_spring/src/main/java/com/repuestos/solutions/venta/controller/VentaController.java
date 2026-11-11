@@ -33,7 +33,7 @@ public class VentaController {
 
     @PostMapping
     public ResponseEntity<?> registrar(@RequestBody Map<String, Object> body) {
-        if (!SecurityUtil.hasAnyRole(1, 2)) {
+        if (!SecurityUtil.hasAnyRole(SecurityUtil.ROLE_ADMIN, SecurityUtil.ROLE_RECEPCION)) {
             return ApiResponse.error("Acceso denegado.", HttpStatus.FORBIDDEN);
         }
         try {
@@ -50,7 +50,7 @@ public class VentaController {
                                     @RequestParam(required = false) String estado_pago,
                                     @RequestParam(required = false) String fecha_desde,
                                     @RequestParam(required = false) String fecha_hasta) {
-        if (!SecurityUtil.hasAnyRole(1)) {
+        if (!SecurityUtil.hasAnyRole(SecurityUtil.ROLE_ADMIN)) {
             return ApiResponse.error("Acceso denegado.", HttpStatus.FORBIDDEN);
         }
         Map<String, Object> data = service.listar(estado_pago, fecha_desde, fecha_hasta, page, per_page);
@@ -63,7 +63,7 @@ public class VentaController {
 
     @PatchMapping("/{id}/estado-pago")
     public ResponseEntity<?> cambiarEstadoPago(@PathVariable int id) {
-        if (!SecurityUtil.hasAnyRole(1)) {
+        if (!SecurityUtil.hasAnyRole(SecurityUtil.ROLE_ADMIN)) {
             return ApiResponse.error("Acceso denegado.", HttpStatus.FORBIDDEN);
         }
         try {
@@ -75,7 +75,7 @@ public class VentaController {
 
     @PatchMapping("/{id}/vendedor")
     public ResponseEntity<?> actualizarVendedor(@PathVariable int id, @RequestBody Map<String, Object> body) {
-        if (!SecurityUtil.hasAnyRole(1)) {
+        if (!SecurityUtil.hasAnyRole(SecurityUtil.ROLE_ADMIN)) {
             return ApiResponse.error("Acceso denegado.", HttpStatus.FORBIDDEN);
         }
         Integer idUsuario = body.get("id_usuario") instanceof Number n ? n.intValue() : null;
@@ -91,7 +91,7 @@ public class VentaController {
 
     @PatchMapping("/{id}/financiero")
     public ResponseEntity<?> actualizarFinanciero(@PathVariable int id, @RequestBody Map<String, Object> body) {
-        if (!SecurityUtil.hasAnyRole(1)) {
+        if (!SecurityUtil.hasAnyRole(SecurityUtil.ROLE_ADMIN)) {
             return ApiResponse.error("Acceso denegado.", HttpStatus.FORBIDDEN);
         }
         try {

@@ -19,10 +19,7 @@ export function actualizarPerfil(data) {
 export function subirFotoPerfil(file) {
   const form = new FormData();
   form.append('file', file);
-  const headers = {};
-  const token = localStorage.getItem('trucks_token');
-  if (token) headers.Authorization = `Bearer ${token}`;
-  return fetch('/api/v1/auth/me/foto', { method: 'POST', headers, body: form })
+  return fetch('/api/v1/auth/me/foto', { method: 'POST', body: form, credentials: 'same-origin' })
     .then(async (res) => {
       let data = null;
       try { data = await res.json(); } catch { /* sin JSON */ }

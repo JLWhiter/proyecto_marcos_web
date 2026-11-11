@@ -41,7 +41,7 @@ public class ReporteController {
 
     @GetMapping("/valor")
     public ResponseEntity<?> valor() {
-        if (!SecurityUtil.hasAnyRole(1, 2, 3)) {
+        if (!SecurityUtil.hasAnyRole(SecurityUtil.ROLE_ADMIN, SecurityUtil.ROLE_RECEPCION, SecurityUtil.ROLE_ALMACENAMIENTO)) {
             return ApiResponse.error("Acceso denegado.", HttpStatus.FORBIDDEN);
         }
         return ApiResponse.success(service.valorInventario(), "Valor del inventario");
@@ -50,7 +50,7 @@ public class ReporteController {
     @GetMapping("/movimientos")
     public ResponseEntity<?> movimientos(@RequestParam(required = false) String fecha_desde,
                                          @RequestParam(required = false) String fecha_hasta) {
-        if (!SecurityUtil.hasAnyRole(1, 2, 3)) {
+        if (!SecurityUtil.hasAnyRole(SecurityUtil.ROLE_ADMIN, SecurityUtil.ROLE_RECEPCION, SecurityUtil.ROLE_ALMACENAMIENTO)) {
             return ApiResponse.error("Acceso denegado.", HttpStatus.FORBIDDEN);
         }
         return ApiResponse.success(service.movimientosResumen(fecha_desde, fecha_hasta), "Resumen de movimientos");
@@ -58,7 +58,7 @@ public class ReporteController {
 
     @GetMapping("/ventas")
     public ResponseEntity<?> ventasResumen(@RequestParam(required = false) String periodo) {
-        if (!SecurityUtil.hasAnyRole(1)) {
+        if (!SecurityUtil.hasAnyRole(SecurityUtil.ROLE_ADMIN)) {
             return ApiResponse.error("Acceso denegado.", HttpStatus.FORBIDDEN);
         }
         return ApiResponse.success(service.ventasResumen(periodo), "Resumen de ventas");
@@ -67,7 +67,7 @@ public class ReporteController {
     @GetMapping("/evolucion-ventas")
     public ResponseEntity<?> evolucionVentas(@RequestParam(required = false) Integer anio,
                                              @RequestParam(required = false) String moneda) {
-        if (!SecurityUtil.hasAnyRole(1)) {
+        if (!SecurityUtil.hasAnyRole(SecurityUtil.ROLE_ADMIN)) {
             return ApiResponse.error("Acceso denegado.", HttpStatus.FORBIDDEN);
         }
         int year = (anio == null || anio <= 0) ? java.time.Year.now().getValue() : anio;
@@ -81,7 +81,7 @@ public class ReporteController {
 
     @PutMapping("/tasa-cambio")
     public ResponseEntity<?> setTasaCambio(@RequestBody Map<String, Object> body) {
-        if (!SecurityUtil.hasAnyRole(1)) {
+        if (!SecurityUtil.hasAnyRole(SecurityUtil.ROLE_ADMIN)) {
             return ApiResponse.error("Acceso denegado.", HttpStatus.FORBIDDEN);
         }
         double tasa = body.get("tasa_cambio") instanceof Number n ? n.doubleValue() : Double.NaN;
@@ -99,7 +99,7 @@ public class ReporteController {
                                        @RequestParam(required = false) String disponibilidad,
                                        @RequestParam(required = false) String orden,
                                        @RequestParam(required = false) Integer usuario_id) {
-        if (!SecurityUtil.hasAnyRole(1, 2, 3)) {
+        if (!SecurityUtil.hasAnyRole(SecurityUtil.ROLE_ADMIN, SecurityUtil.ROLE_RECEPCION, SecurityUtil.ROLE_ALMACENAMIENTO)) {
             return ApiResponse.error("Acceso denegado.", HttpStatus.FORBIDDEN);
         }
         return ApiResponse.success(service.historial(fecha_desde, fecha_hasta, codigo,
@@ -111,7 +111,7 @@ public class ReporteController {
                                          @RequestParam(required = false) String fecha_hasta,
                                          @RequestParam(defaultValue = "1") int page,
                                          @RequestParam(defaultValue = "10") int per_page) {
-        if (!SecurityUtil.hasAnyRole(1)) {
+        if (!SecurityUtil.hasAnyRole(SecurityUtil.ROLE_ADMIN)) {
             return ApiResponse.error("Acceso denegado.", HttpStatus.FORBIDDEN);
         }
         Map<String, Object> data = service.listarDanos(fecha_desde, fecha_hasta, page, per_page);
@@ -124,7 +124,7 @@ public class ReporteController {
 
     @PostMapping("/dano")
     public ResponseEntity<?> reportarDano(@RequestBody Map<String, Object> body) {
-        if (!SecurityUtil.hasAnyRole(3)) {
+        if (!SecurityUtil.hasAnyRole(SecurityUtil.ROLE_ALMACENAMIENTO)) {
             return ApiResponse.error("Solo el almacenero puede registrar reportes de daño.", HttpStatus.FORBIDDEN);
         }
         Integer idInventario = body.get("id_inventario") instanceof Number n ? n.intValue() : null;
@@ -141,7 +141,7 @@ public class ReporteController {
 
     @PostMapping("/evidencia")
     public ResponseEntity<?> subirEvidencia(@RequestParam("file") MultipartFile file) {
-        if (!SecurityUtil.hasAnyRole(3)) {
+        if (!SecurityUtil.hasAnyRole(SecurityUtil.ROLE_ALMACENAMIENTO)) {
             return ApiResponse.error("Acceso denegado.", HttpStatus.FORBIDDEN);
         }
         if (file == null || file.isEmpty()) {

@@ -28,7 +28,7 @@ public class MovimientoController {
 
     @PostMapping
     public ResponseEntity<?> registrar(@RequestBody Map<String, Object> body) {
-        if (!SecurityUtil.hasAnyRole(1, 2, 3)) {
+        if (!SecurityUtil.hasAnyRole(SecurityUtil.ROLE_ADMIN, SecurityUtil.ROLE_RECEPCION, SecurityUtil.ROLE_ALMACENAMIENTO)) {
             return ApiResponse.error("Acceso denegado.", HttpStatus.FORBIDDEN);
         }
         String tipo = body.get("tipo") != null ? String.valueOf(body.get("tipo")) : null;

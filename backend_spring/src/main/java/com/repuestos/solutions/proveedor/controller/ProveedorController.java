@@ -35,7 +35,7 @@ public class ProveedorController {
 
     @PostMapping
     public ResponseEntity<?> crear(@RequestBody Map<String, Object> body) {
-        if (!SecurityUtil.hasAnyRole(1, 2, 3)) {
+        if (!SecurityUtil.hasAnyRole(SecurityUtil.ROLE_ADMIN, SecurityUtil.ROLE_RECEPCION, SecurityUtil.ROLE_ALMACENAMIENTO)) {
             return ApiResponse.error("Acceso denegado.", HttpStatus.FORBIDDEN);
         }
         Object nombre = body.get("nombre");

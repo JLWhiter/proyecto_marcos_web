@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useNavigation } from './context/NavigationContext'
-import { isAuthenticated } from './api/client'
+import { useAuth } from './context/AuthContext'
 import Login from './pages/Login'
 import EditarPerfil from './pages/EditarPerfil'
 import RecepcionistaLayout from './pages/recepcionista/Recepcionistalayout'
@@ -9,12 +9,19 @@ import AdminLayout from './pages/admin/AdminLayout'
 
 function App() {
   const { currentPage, navigate } = useNavigation()
+  const { user, loading } = useAuth()
 
   useEffect(() => {
-    if (!isAuthenticated() && currentPage !== "login") {
+    if (!loading && !user && currentPage !== "login") {
       navigate("login")
     }
-  }, [currentPage, navigate])
+    if (!loading && user && currentPage === "login") {
+      const rol = user.rol_nombre;
+      if (rol === "Administrador") navigate("admin/dashboard");
+      else if (rol === "Almacenamiento") navigate("almacenero/inventario");
+      else navigate("recepcionista/recepcion");
+    }
+  }, [currentPage, loading, navigate, user])
 
   useEffect(() => {
     const onUnauthorized = () => navigate("login");
@@ -22,7 +29,11 @@ function App() {
     return () => window.removeEventListener("trucks:unauthorized", onUnauthorized);
   }, [navigate])
 
-  if (!isAuthenticated()) {
+  if (loading) {
+    return <div className="min-vh-100 d-flex align-items-center justify-content-center text-muted">Verificando sesión...</div>
+  }
+
+  if (!user) {
     return <Login />
   }
 
